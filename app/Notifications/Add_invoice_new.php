@@ -6,20 +6,22 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
+use App\invoices;
 
-class AddInvoice extends Notification
+class Add_invoice_new extends Notification
 {
     use Queueable;
-    private $invoice_id;
+    private $invoices;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($invoice_id)
+    public function __construct(invoices $invoices)
     {
-        $this->invoice_id = $invoice_id;
+        $this->invoices = $invoices;
     }
 
     /**
@@ -30,7 +32,7 @@ class AddInvoice extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -39,15 +41,7 @@ class AddInvoice extends Notification
      * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    public function toMail($notifiable)
-    {
-        $url = 'http://127.0.0.1:8000/InvoicesDetails/'.$this->invoice_id;
-        return (new MailMessage)
-                    ->subject('اضافة فاتورة جديدة')
-                    ->line('اضافة فاتورة جديدة')
-                    ->action('عرض الفاتورة', $url)
-                    ->line('شكراً لاستخدامك موقع شركة الأستاذ للحسابات والفواتير');
-    }
+
 
     /**
      * Get the array representation of the notification.
@@ -55,10 +49,15 @@ class AddInvoice extends Notification
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
+    public function toDatabase($notifiable)
     {
         return [
-            //
+
+            //'data' => $this->details['body']
+            'id'=> $this->invoices->id,
+            'title'=>'تم اضافة فاتورة جديد بواسطة :',
+            'user'=> Auth::user()->name,
+
         ];
     }
 }
